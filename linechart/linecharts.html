@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Davis Line Charts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/reveal.css" rel="stylesheet"/>
+    <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src='js/d3.v3.min.js'></script>
+    <script type="text/javascript" src='js/queue.js'></script>
+    <script type="text/javascript" src='js/underscore.js'></script>
+    <script type="text/javascript" src="js/backbone.js"></script>
+    <script type="text/javascript" src="js/jquery.reveal.js"></script>
+    <script type="text/javascript" src="js/davis/linechart.js"></script>
+    <script type="text/javascript">
+
+    dataToShow = [/*{ title: "Process Count Consolidated Statistics",
+                    baseUrl: "data/",
+                    prefix: "PnConsolidatedStats",
+                    category: ["Regular Processes", "Bonus Processes"],
+                    unit: "Log2 Number of Processes",
+                    scale: "linear",
+                    type: "LineChart"
+                  },
+                  { title: "Instant Statistics",
+                    baseUrl: "data/",
+                    prefix: "InstantStats",
+                    category: ["Running Jobs", "Queued Jobs"],
+                    unit: "Number of Jobs",
+                    scale: "linear",
+                    type: "LineChart"
+                  },*/
+                  { title: "Number of Nodes Used",
+                    baseUrl: "data/",
+                    prefix: "VerticesStats",
+                    category: ["Total Nodes", "Running Nodes", "Completed Nodes"],
+                    unit: "Number of Nodes",
+                    scale: "log2",
+                    type: "LineChart"
+                  }];
+
+    $(document).ready(function(){
+      var now = new Date("10/04/2013");
+
+      
+      var charts = [];
+      _.each(dataToShow, function(options, i)
+          {
+              chart = new LineChart(options);
+              charts.push(chart);
+              chart.getData(now);
+              chart.target = "mini" + i;
+          });
+      
+/*
+      var lineChart1 = new LineChart(dataToShow[0]);
+      lineChart1.getData(now);
+*/
+      
+      $("body").on("dataready", function(e){
+          e.sender.setSVG(e.sender.target);
+          e.sender.render();
+      });
+
+     var currentChart;
+     $(".minichart").click(function(e){
+        $('#chartLayer').reveal({
+           animation: 'fadeAndPop',
+           animationspeed: 300, 
+           closeonbackgroundclick: true, 
+           dismissmodalclass: 'close-reveal-modal' 
+          });
+         currentChart = charts[+this.id.substring(4)];
+         currentChart.setSVG("large1");
+         currentChart.render();
+      });
+
+     $("#datePicker").change(function(e){
+      if(currentChart){
+        currentChart.getData(new Date(this.value) );
+      }
+     })
+    });
+    </script>
+    <style>
+body {
+  padding-top: 60px;
+  padding-bottom: 20px;
+}
+
+.minichart{
+  width:320px;
+  height:240px;
+}
+
+.lgchart{
+  width:1024px;
+  height:768px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+}
+
+.y.axis path{
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+  </style>
+  </head>
+
+  <body>
+    <div id="chartLayer" class="reveal-modal xxlarge">
+      <div class="container">
+        <div class="col-md-12">
+          <p>Date: <input type="date" id="datePicker"/></p>
+          <svg class="lgchart" id="large1"></svg>
+        </div>
+      </div>
+      <a class="close-reveal-modal">&#215;</a>
+
+    </div>
+    
+    <div class="container">
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-body"><svg class="minichart" id="mini0"></svg></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-body"><svg class="minichart" id="mini1"></svg></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-body"><svg class="minichart" id="mini2"></svg></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
